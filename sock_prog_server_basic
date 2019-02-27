@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+import socket
+import sys
+import subprocess
+import signal
+
+def start_server():
+	host = '127.0.0.1'
+	port = 65432
+	status = True
+
+	subprocess.call('clear', shell=True)
+
+	try:
+		soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)		
+		soc.bind((host,port))
+		print ("Socket successfully created")
+	except:
+		print ('Unable to bind to ' + host + " " + str(port))
+		sys.exit()	
+
+	soc.listen()
+	print("Server is listening on port " + str(port))
+
+	while status:
+		conn, addr = soc.accept()
+		print ("Server connected to client " + str(addr[0]) + " " + str(addr[1]))		
+		while True:
+			client_input = conn.recv(1024)
+			mes = str(client_input.decode('utf-8'))
+			if mes.upper() == 'QUIT':
+				print ('Closing connection for ' + str(addr[0]) + " " + str(addr[1]))
+				break
+			print ("Msg from " + str(addr[0]) + " " + str(addr[1])+" : "+ mes)
+
+	soc.close()
+
+try:
+	start_server()
+except KeyboardInterrupt:
+    print ('Interrupted, closing the socket and quitting')
+    sys.exit(0)
